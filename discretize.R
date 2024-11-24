@@ -63,18 +63,23 @@ next_best_split <- function(X, y, col, bins, quantiles) {
     breaks <- unique(quantile(X[[col]], breaks = new_bins, na.rm = TRUE))
     X_temp[[col]] <- cut(X[[col]], breaks = breaks,
                          include.lowest = TRUE, labels = FALSE)
+    rm_df <- X_temp
+    rm_df$y <- y
     
-    X_temp_matrix <- as.matrix(X_temp)
-
+    # model matrix and save
+    rm_mat <- model.matrix(y ~ ., data = rm_df)
+    rm_mat <- cbind(rm_mat, y = rm_df$y)
+    X_rm <- as.matrix(rm_mat[,-ncol(rm_mat)])
+    y_rm <- as.matrix(rm_mat[,ncol(rm_mat)])
+    
     # Fit risk model and calculate objective function
     if (is.null(prev_beta)) {
-      mod <- risk_mod(X = X_temp_matrix, y = y)
+      mod <- risk_mod(X = X_rm, y = y_rm)
     } else {
-      mod <- risk_mod(X = X_temp_matrix, y = y, beta = prev_beta)
+      mod <- risk_mod(X = X_rm, y = y_rm, beta = prev_beta)
     }
     
-    obj_value <- obj_fn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0)
-    
+    obj_value <- obj_fcn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0)
     # Check if new cut improved obj function
     if (obj_value < best_obj_value) {
       best_obj_value <- obj_value

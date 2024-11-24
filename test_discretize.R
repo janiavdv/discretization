@@ -63,6 +63,14 @@ preprocess <- function(data) {
   
   data <- na.omit(data)
   
+  # some categorical variable have levels with few observations
+  # drop ram and regular_drug since only 5 observations in class 1
+  data <- data %>% select(-c(ram, regular_drug))
+
+  # education levels could be combined but we drop since not
+  # included in data documentation and unclear best way to relevel
+  data <- data %>% select(-c(edu_level_mom, edu_level_dad))
+  
   non_numeric_columns <- names(data)[!sapply(data, is.numeric)]
   data[non_numeric_columns] <- lapply(data[non_numeric_columns], as.factor)
   
