@@ -1,6 +1,6 @@
 library(stats)
 
-dicretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(0, 1, length.out = 11)) {
+discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(0, 1, length.out = 11)) {
   # X: data frame
   # y: target variable
   # threshold: % threshold for NLL improvement
