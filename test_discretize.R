@@ -84,4 +84,20 @@ y <- df %>% pull(adherence_outcome) # get target column as vector
 cont_cols <- c("self_eff", "tx_mos", "stig_tot",
               "phq9_tot", "age_BLchart", "ace_score")
 
-disc_df <- discretize(X, y, continuous_cols = cont_cols)
+disc_X <- discretize(X, y, continuous_cols = cont_cols)
+
+obj_fcn_disc <- function(X, y) {
+  df = X
+  df$y = y
+  
+  # model matrix and save
+  mat <- model.matrix(y ~ ., data=df)
+  mat <- cbind(mat, y = df$y)
+  X_rm = as.matrix(mat[,-ncol(mat)])
+  y_rm = as.matrix(mat[,ncol(mat)])
+  
+  mod <- risk_mod(X = X_rm, y = y_rm)
+  return(obj_fcn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0))
+}
+
+obj_fcn_disc(disc_X, y)
