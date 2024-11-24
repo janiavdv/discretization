@@ -1,4 +1,6 @@
 library(stats)
+source("../riskscores/R/risk_mod.R")
+source("../riskscores/R/utils.R")
 
 discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(0, 1, length.out = 11)) {
   # X: data frame
@@ -66,9 +68,9 @@ next_best_split <- function(X, y, col, bins, quantiles) {
 
     # Fit risk model and calculate objective function
     if (is.null(prev_beta)) {
-      mod <- riskscores::risk_mod(X = X_temp_matrix, y = y)
+      mod <- risk_mod(X = X_temp_matrix, y = y)
     } else {
-      mod <- riskscores::risk_mod(X = X_temp_matrix, y = y, beta = prev_beta)
+      mod <- risk_mod(X = X_temp_matrix, y = y, beta = prev_beta)
     }
     
     obj_value <- obj_fn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0)
