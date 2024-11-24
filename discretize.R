@@ -9,8 +9,9 @@ discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(
   
   # initialize the discretization with the quantiles
   for (col in continuous_cols) {
-      X[[col]] <- cut(X[[col]], quantile(X[[col]], probs = quantiles), 
-                      include.lowest = TRUE, labels = FALSE)
+    breaks <- unique(quantile(X[[col]], probs = quantiles, na.rm = TRUE))
+    X[[col]] <- cut(X[[col]], breaks = breaks, 
+                    include.lowest = TRUE, labels = FALSE)
   }
   
   # fit logistic regression and calculate NLL
@@ -57,14 +58,17 @@ next_best_split <- function(X, y, col, bins, quantiles) {
     new_bins <- sort(unique(c(bins, q)))
     
     X_temp <- X
-    X_temp[[col]] <- cut(X[[col]], breaks = quantile(X[[col]], probs = new_bins, na.rm = TRUE),
+    breaks <- unique(quantile(X[[col]], breaks = new_bins, na.rm = TRUE))
+    X_temp[[col]] <- cut(X[[col]], breaks = breaks,
                          include.lowest = TRUE, labels = FALSE)
     
+    X_temp_matrix <- as.matrix(X_temp)
+
     # Fit risk model and calculate objective function
     if (is.null(prev_beta)) {
-      mod <- riskscores::risk_mod(X = X_temp, y = y)
+      mod <- riskscores::risk_mod(X = X_temp_matrix, y = y)
     } else {
-      mod <- riskscores::risk_mod(X = X_temp, y = y, beta = prev_beta)
+      mod <- riskscores::risk_mod(X = X_temp_matrix, y = y, beta = prev_beta)
     }
     
     obj_value <- obj_fn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0)
