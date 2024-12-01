@@ -9,7 +9,7 @@ floor_median <- function(x) {
 
 preprocess <- function(data) {
   # define binary outcome (y)
-  data$adherence_outcome <- ifelse(data$PCTadherence_sensi < 0.95, 1, 0)
+  data$adherence_outcome <- ifelse(data$PCTadherence_sensi < 95, 1, 0)
   
   # drop subsequent regimens
   data <- data %>%
