@@ -61,6 +61,7 @@ next_best_split <- function(X, y, col, bins, quantiles) {
     
     X_temp <- X
     breaks <- unique(quantile(X[[col]], breaks = new_bins, na.rm = TRUE))
+    if (length(breaks) < 2) next
     X_temp[[col]] <- cut(X[[col]], breaks = breaks,
                          include.lowest = TRUE, labels = FALSE)
     rm_df <- X_temp
