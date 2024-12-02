@@ -33,7 +33,7 @@ discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(
       model_split <- glm(y ~ ., data = cbind(X_split, y = y), family = binomial)
       NLL_split <- -logLik(model_split)
       
-      if (NLL_split < ((1 - threshold) * NLL)) {
+      if (NLL_split >= ((1 + threshold) * NLL)) {
         X <- X_split
         NLL <- NLL_split
         bins <- unique(as.numeric(levels(X[[col]])))
@@ -83,7 +83,7 @@ next_best_split <- function(X, y, col, bins, quantiles, threshold) {
     
     obj_value <- obj_fcn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0)
     # Check if new cut improved obj function by threshold %
-    if (obj_value < ((1 - threshold) * best_obj_value)) {
+    if (obj_value >= ((1 + threshold) * best_obj_value)) {
       best_obj_value <- obj_value
       prev_beta <- mod$beta
       X <- X_temp
