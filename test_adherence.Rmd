@@ -1,0 +1,22 @@
+```{r, warning=FALSE}
+source("../riskscores/R/risk_mod.R")
+source("../riskscores/R/utils.R")
+
+raw_data <- read.csv("data/Peru_TB_data.csv") 
+```
+
+```{r}
+source("preprocessing.R")
+tb_df <- tb_preprocessing(raw_data)
+tb_mat <- tb_as_matrix(tb_df)
+```
+
+
+```{r, out.width="75%", fig.align = 'center', warning = FALSE}
+adh_X <- as.matrix(tb_mat[,-ncol(tb_mat)])
+adh_y <- tb_mat[,ncol(tb_mat)]
+
+adh_mod <- risk_mod(adh_X,adh_y)
+adh_obj <- obj_fcn(adh_mod$X, adh_mod$y, adh_mod$gamma, adh_mod$beta, adh_mod$weights, adh_mod$lambda0)
+adh_card <- adh_mod$model_card
+```
