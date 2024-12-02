@@ -28,7 +28,7 @@ discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(
     
     while (TRUE) {
       # find the next best cut point for col
-      X_split <- next_best_split(X, y, col, bins, quantiles)
+      X_split <- next_best_split(X, y, col, bins, quantiles, threshold)
       
       model_split <- glm(y ~ ., data = cbind(X_split, y = y), family = binomial)
       NLL_split <- -logLik(model_split)
@@ -45,12 +45,13 @@ discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(
   return(X)
 }
 
-next_best_split <- function(X, y, col, bins, quantiles) {
+next_best_split <- function(X, y, col, bins, quantiles, threshold) {
   # X: data frame
   # y: target variable
   # col: col to make cuts on next
   # bins: current bins we're allowed to make a cut on
   # quantiles: possible split boundaries
+  # threshold: % threshold for objective function improvement
   
   best_obj_value <- Inf
   prev_beta <- NULL # for warm-starting the model optimization
@@ -81,8 +82,8 @@ next_best_split <- function(X, y, col, bins, quantiles) {
     }
     
     obj_value <- obj_fcn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0)
-    # Check if new cut improved obj function
-    if (obj_value < best_obj_value) {
+    # Check if new cut improved obj function by threshold %
+    if (obj_value < ((1 - threshold) * best_obj_value)) {
       best_obj_value <- obj_value
       prev_beta <- mod$beta
       X <- X_temp
