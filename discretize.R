@@ -2,16 +2,36 @@ library(stats)
 source("../riskscores/R/risk_mod.R")
 source("../riskscores/R/utils.R")
 
-discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(0, 1, length.out = 11)) {
+discretize <- function(X, y, threshold = 0.01, continuous_cols, n_quantiles = NULL) {
   # X: data frame
   # y: target variable
   # threshold: % threshold for NLL improvement
   # continuous_cols: list of continuous columns in X
-  # quantiles: possible cuts for discretization
+  # n_quantiles: list of positive integers of quantiles for each column
   
-  # initialize the discretization with the quantiles
-  for (col in continuous_cols) {
-    breaks <- unique(quantile(X[[col]], probs = quantiles, na.rm = TRUE))
+  n_cols = length(continuous_cols)
+  
+  # If quantiles is NULL, use 10 quantiles for every column
+  if (is.null(n_quantiles)) {
+    n_quantiles <- rep(10, n_cols)
+  }
+  
+  if (length(n_quantiles) != n_cols) {
+    stop ("continuous_cols and n_quantiles must be the same length!")
+  }
+  
+  if (any(n_quantiles <= 0) || any(n_quantiles %% 1 != 0)) {
+    stop("n_quantiles must contain only positive integers")
+  }
+
+  quantiles <- list()
+  for (i in 1:n_cols) {
+    # Generate quantiles for each column
+    quantiles[[i]] <- seq(0, 1, length.out = n_quantiles[i] + 1)
+    
+    # Initialize the discretization with the quantiles
+    col <- continuous_cols[i]
+    breaks <- unique(quantile(X[[col]], probs = quantiles[[i]], na.rm = TRUE))
     X[[col]] <- cut(X[[col]], breaks = breaks, 
                     include.lowest = TRUE, labels = FALSE)
   }
@@ -20,15 +40,18 @@ discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(
   model <- glm(y ~ ., data = cbind(X, y = y), family = binomial)
   NLL <- -logLik(model)
   
-  # shuffle columns order
-  continuous_cols <- sample(continuous_cols)
+  # Shuffle columns and quantiles based on the same indices
+  shuffle <- sample(n_cols)
+  continuous_cols <- continuous_cols[shuffle]
+  quantiles <- quantiles[shuffle]
   
-  for (col in continuous_cols) {
+  for (i in 1:n_cols) {
     bins <- c(0, 1)
+    col <- continuous_cols[i]
     
     while (TRUE) {
       # find the next best cut point for col
-      X_split <- next_best_split(X, y, col, bins, quantiles, threshold)
+      X_split <- next_best_split(X, y, col, bins, quantiles[[i]], threshold)
       
       model_split <- glm(y ~ ., data = cbind(X_split, y = y), family = binomial)
       NLL_split <- -logLik(model_split)
@@ -45,18 +68,18 @@ discretize <- function(X, y, threshold = 0.01, continuous_cols, quantiles = seq(
   return(X)
 }
 
-next_best_split <- function(X, y, col, bins, quantiles, threshold) {
+next_best_split <- function(X, y, col, bins, col_quantiles, threshold) {
   # X: data frame
   # y: target variable
   # col: col to make cuts on next
   # bins: current bins we're allowed to make a cut on
-  # quantiles: possible split boundaries
+  # col_quantiles: possible split boundaries for this column
   # threshold: % threshold for objective function improvement
   
   best_obj_value <- Inf
   prev_beta <- NULL # for warm-starting the model optimization
   
-  for (q in quantiles) {
+  for (q in col_quantiles) {
     # Make a cut point at q by splitting the bin
     new_bins <- sort(unique(c(bins, q)))
     

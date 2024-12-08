@@ -88,9 +88,9 @@ cont_cols <- c("self_eff", "tx_mos", "stig_tot",
 
 
 ```{r, warning=FALSE}
-disc_X_10 <- discretize(X, y, continuous_cols = cont_var, quantiles = seq(0, 1, length.out = 11))
-disc_X_5 <- discretize(X, y, continuous_cols = cont_var, quantiles = seq(0, 1, length.out = 6))
-disc_X_3 <- discretize(X, y, continuous_cols = cont_var, quantiles = seq(0, 1, length.out = 4))
+disc_X_10 <- discretize(X, y, continuous_cols = cont_var)
+disc_X_5 <- discretize(X, y, continuous_cols = cont_var, n_quantiles = rep(5, length(cont_var)))
+disc_X_3 <- discretize(X, y, continuous_cols = cont_var, n_quantiles = rep(3, length(cont_var)))
 ```
 
 ```{r, warning=FALSE}
