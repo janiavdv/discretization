@@ -65,6 +65,18 @@ discretize <- function(X, y, threshold = 0.01, continuous_cols, n_quantiles = NU
       }
     }
   }
+  
+  # Change bucketized columns to be one-hot encoded
+  for (col in continuous_cols) {
+    # Generate one-hot encoded matrix for the column
+    one_hot <- model.matrix(~ factor(X[[col]]) - 1)  # - 1 removes the intercept 
+    colnames(one_hot) <- paste(col, levels(factor(X[[col]])), sep = "_")
+    
+    # Add the new columns and remove the old one
+    X <- cbind(X, one_hot)
+    X[[col]] <- NULL
+  }
+  
   return(X)
 }
 
