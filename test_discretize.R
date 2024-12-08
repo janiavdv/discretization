@@ -86,18 +86,14 @@ cont_cols <- c("self_eff", "tx_mos", "stig_tot",
 
 disc_X <- discretize(X, y, continuous_cols = cont_cols)
 
-obj_fcn_disc <- function(X, y) {
-  df = X
-  df$y = y
-  
-  # model matrix and save
-  mat <- model.matrix(y ~ ., data=df)
-  mat <- cbind(mat, y = df$y)
-  X_rm = as.matrix(mat[,-ncol(mat)])
-  y_rm = as.matrix(mat[,ncol(mat)])
-  
-  mod <- risk_mod(X = X_rm, y = y_rm)
-  return(obj_fcn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0))
-}
+disc_df = disc_X
+disc_df$y = y
 
-obj_fcn_disc(disc_X, y)
+# model matrix and save
+mat <- model.matrix(y ~ ., data=df)
+mat <- cbind(mat, y = df$y)
+X_rm = as.matrix(mat[,-ncol(mat)])
+y_rm = as.matrix(mat[,ncol(mat)])
+  
+mod <- risk_mod(X = X_rm, y = y_rm)
+obj <- obj_fcn(mod$X, mod$y, mod$gamma, mod$beta, mod$weights, mod$lambda0)

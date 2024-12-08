@@ -111,11 +111,25 @@ get_results <- function(disc_X) {
 }
 ```
 
-```{r}
+```{r, warning=FALSE}
+res10 <- get_results(disc_X_10)
+res5 <- get_results(disc_X_5)
+res3 <- get_results(disc_X_3)
+```
+
+```{r, warning=FALSE}
 t01q10 <- get_results(discretize(X, y, continuous_cols = cont_var))
 t05q10 <- get_results(discretize(X, y, continuous_cols = cont_var,  
                                  threshold = 0.05))
+t001q10 <- get_results(discretize(X, y, continuous_cols = cont_var,
+                                  threshold = 0.001))
+t005q10 <- get_results(discretize(X, y, continuous_cols = cont_var,  
+                                 threshold = 0.005))
+```
 
-t0001q10 <- get_results(discretize(X, y, continuous_cols = cont_var, quantiles = seq(0, 1, length.out = 11)))
-t0005q10 <- get_results(discretize(X, y, continuous_cols = cont_var, quantiles = seq(0, 1, length.out = 11)))
+
+```{r, warning=FALSE}
+compare_df <- data.frame(X$age_BLchart, tb_df$age_cat, disc_X_10$age_BLchart,
+                         disc_X_5$age_BLchart, disc_X_3$age_BLchart)
+
 ```
