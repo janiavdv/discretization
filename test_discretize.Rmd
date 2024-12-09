@@ -126,9 +126,21 @@ t005q10 <- get_results(discretize(X, y, continuous_cols = cont_cols,
                                  threshold = 0.005))
 ```
 
+```{r, warning=FALSE}
+disc_X_345533 <- discretize(X, y, continuous_cols = cont_cols, n_quantiles=c(3,4,5,5,3,3))
+res_345533 <- get_results(disc_X_345533)
+
+disc_X_234422 <- discretize(X, y, continuous_cols = cont_cols, n_quantiles=c(2,3,4,4,2,2))
+res_234422 <- get_results(disc_X_234422)
+
+disc_X_456644 <- discretize(X, y, continuous_cols = cont_cols, n_quantiles=c(4,5,6,6,4,4))
+res_456644 <- get_results(disc_X_456644)
+
+disc_X_446644 <- discretize(X, y, continuous_cols = cont_cols, n_quantiles=c(4,4,6,6,4,4))
+res_446644 <- get_results(disc_X_446644)
+```
 
 ```{r, warning=FALSE}
 compare_df <- data.frame(X$age_BLchart, tb_df$age_cat, disc_X_10$age_BLchart,
                          disc_X_5$age_BLchart, disc_X_3$age_BLchart)
-
 ```
